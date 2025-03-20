@@ -43,8 +43,8 @@ namespace RhubarbGeekNz.PSWriteLine
 
         internal struct ColorMap
         {
-            internal ConsoleColor ConsoleColor;
-            internal Color Color;
+            internal readonly ConsoleColor ConsoleColor;
+            internal readonly Color Color;
             internal ColorMap(ConsoleColor cc, Color c)
             {
                 ConsoleColor = cc;
