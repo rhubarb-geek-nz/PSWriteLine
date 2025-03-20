@@ -85,7 +85,7 @@ namespace RhubarbGeekNz.PSWriteLine
 
         protected override void ProcessRecord()
         {
-            string result = ProcessObject(Object, null);
+            string result = ProcessObject(Object);
 
             HostInformationMessage informationMessage = new HostInformationMessage();
             informationMessage.Message = result;
@@ -297,6 +297,7 @@ namespace RhubarbGeekNz.PSWriteLine
                 b = color.B - baseColor.B;
             return r * r + g * g + b * b;
         }
+
         private ConsoleColor GetNearestConsoleColor(Color baseColor)
         {
             int current = Int32.MaxValue;
@@ -321,17 +322,40 @@ namespace RhubarbGeekNz.PSWriteLine
             return ConsoleColorMap[value].ConsoleColor;
         }
 
-        private string ProcessObject(object o, List<string> result)
+        private string ProcessObject(object o)
+        {
+            if (o != null)
+            {
+                if (o is string s)
+                {
+                    return s;
+                }
+                else if (o is IEnumerable enumerable)
+                {
+                    var result = new List<string>();
+
+                    foreach (var e in enumerable)
+                    {
+                        ProcessObject(e, result);
+                    }
+
+                    return String.Join(Separator == null ? String.Empty : Separator.ToString(), result);
+                }
+                else
+                {
+                    return o.ToString();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        private void ProcessObject(object o, List<string> result)
         {
             while (o != null)
             {
                 if (o is string s)
                 {
-                    if (result == null)
-                    {
-                        return s;
-                    }
-
                     if (s.Length > 0)
                     {
                         result.Add(s);
@@ -341,27 +365,18 @@ namespace RhubarbGeekNz.PSWriteLine
                 }
                 else if (o is IEnumerable enumerable)
                 {
-                    bool parent = result == null;
-
-                    if (parent)
-                    {
-                        result = new List<string>();
-                    }
-
                     foreach (var e in enumerable)
                     {
                         ProcessObject(e, result);
                     }
 
-                    return parent ? String.Join(Separator == null ? String.Empty : Separator.ToString(), result) : String.Empty;
+                    break;
                 }
                 else
                 {
                     o = o.ToString();
                 }
             }
-
-            return String.Empty;
         }
     }
 }

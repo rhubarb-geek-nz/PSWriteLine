@@ -127,6 +127,7 @@ Write-PSHost ONE TWO THREE FOUR
 Write-Host "#### Failed color lookup"
 
 $color = 'Bad Jelly'
+$wasCaught = $false
 
 try
 {
@@ -134,7 +135,13 @@ try
 }
 catch
 {
+	$wasCaught = $true
 	$PSItem
+}
+
+if (-not $wasCaught)
+{
+	throw "Should have caught error with: $color"
 }
 
 Write-Host "#### Finally, with a separator"
