@@ -41,37 +41,6 @@ namespace RhubarbGeekNz.PSWriteLine
         [Parameter]
         public object BackgroundColor { get; set; }
 
-        internal struct ColorMap
-        {
-            internal readonly ConsoleColor ConsoleColor;
-            internal readonly Color Color;
-            internal ColorMap(ConsoleColor cc, Color c)
-            {
-                ConsoleColor = cc;
-                Color = c;
-            }
-        }
-
-        private readonly static ColorMap[] ConsoleColorMap = new ColorMap[]
-        {
-            new ColorMap(ConsoleColor.Black, Color.FromArgb(0xFF, 0, 0, 0)),
-            new ColorMap(ConsoleColor.DarkRed, Color.FromArgb(0xFF, 0x80, 0, 0)),
-            new ColorMap(ConsoleColor.DarkGreen, Color.FromArgb(0xFF, 0, 0x80, 0)),
-            new ColorMap(ConsoleColor.DarkYellow, Color.FromArgb(0xFF, 0x80, 0x80, 0)),
-            new ColorMap(ConsoleColor.DarkBlue, Color.FromArgb(0xFF, 0, 0, 0x80)),
-            new ColorMap(ConsoleColor.DarkMagenta, Color.FromArgb(0xFF, 0x80, 0, 0x80)),
-            new ColorMap(ConsoleColor.DarkCyan, Color.FromArgb(0xFF, 0x00, 0x80, 0x80)),
-            new ColorMap(ConsoleColor.Gray, Color.FromArgb(0xFF, 0xC0, 0xC0, 0xC0)),
-            new ColorMap(ConsoleColor.DarkGray, Color.FromArgb(0xFF, 0x80, 0x80, 0x80)),
-            new ColorMap(ConsoleColor.Red, Color.FromArgb(0xFF, 0xFF, 0, 0)),
-            new ColorMap(ConsoleColor.Green, Color.FromArgb(0xFF, 0, 0xFF, 0)),
-            new ColorMap(ConsoleColor.Yellow, Color.FromArgb(0xFF, 0xFF, 0xFF, 0)),
-            new ColorMap(ConsoleColor.Blue, Color.FromArgb(0xFF, 0, 0, 0xFF)),
-            new ColorMap(ConsoleColor.Magenta, Color.FromArgb(0xFF, 0xFF, 0, 0xFF)),
-            new ColorMap(ConsoleColor.Cyan, Color.FromArgb(0xFF, 0, 0xFF, 0xFF)),
-            new ColorMap(ConsoleColor.White, Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF))
-        };
-
         private object psReadLineOption;
 
         private ConsoleColor foregroundColor, backgroundColor;
@@ -134,7 +103,7 @@ namespace RhubarbGeekNz.PSWriteLine
                             int intValue = int.Parse(s.Substring(1), System.Globalization.NumberStyles.HexNumber);
                             Color rgb = Color.FromArgb(intValue);
 
-                            consoleColor = GetNearestConsoleColor(rgb);
+                            consoleColor = PSColorMap.GetNearestConsoleColor(rgb);
 
                             return true;
                         }
@@ -149,28 +118,28 @@ namespace RhubarbGeekNz.PSWriteLine
 
                                 if ((code >= 30) && (code < 38))
                                 {
-                                    consoleColor = ConsoleColorMap[code - 30].ConsoleColor;
+                                    consoleColor = PSColorMap.ConsoleColorMap[code - 30].ConsoleColor;
 
                                     return true;
                                 }
 
                                 if ((code >= 40) && (code < 48))
                                 {
-                                    consoleColor = ConsoleColorMap[code - 40].ConsoleColor;
+                                    consoleColor = PSColorMap.ConsoleColorMap[code - 40].ConsoleColor;
 
                                     return true;
                                 }
 
                                 if ((code >= 90) && (code < 98))
                                 {
-                                    consoleColor = ConsoleColorMap[code - 82].ConsoleColor;
+                                    consoleColor = PSColorMap.ConsoleColorMap[code - 82].ConsoleColor;
 
                                     return true;
                                 }
 
                                 if ((code >= 100) && (code < 108))
                                 {
-                                    consoleColor = ConsoleColorMap[code - 92].ConsoleColor;
+                                    consoleColor = PSColorMap.ConsoleColorMap[code - 92].ConsoleColor;
 
                                     return true;
                                 }
@@ -180,7 +149,7 @@ namespace RhubarbGeekNz.PSWriteLine
                                     switch (args[1])
                                     {
                                         case 2:
-                                            consoleColor = GetNearestConsoleColor(Color.FromArgb(0xFF, args[2], args[3], args[4]));
+                                            consoleColor = PSColorMap.GetNearestConsoleColor(Color.FromArgb(0xFF, args[2], args[3], args[4]));
                                             return true;
 
                                         case 5:
@@ -188,14 +157,14 @@ namespace RhubarbGeekNz.PSWriteLine
 
                                             if (code < 16)
                                             {
-                                                consoleColor = ConsoleColorMap[code].ConsoleColor;
+                                                consoleColor = PSColorMap.ConsoleColorMap[code].ConsoleColor;
                                             }
                                             else
                                             {
                                                 if (code < 232)
                                                 {
                                                     code -= 16;
-                                                    consoleColor = GetNearestConsoleColor(Color.FromArgb(
+                                                    consoleColor = PSColorMap.GetNearestConsoleColor(Color.FromArgb(
                                                         0xFF,
                                                         ((code / 36) % 6) * 51,
                                                         ((code / 6) % 6) * 51,
@@ -204,7 +173,7 @@ namespace RhubarbGeekNz.PSWriteLine
                                                 else
                                                 {
                                                     code = (code - 232) * 11;
-                                                    consoleColor = GetNearestConsoleColor(Color.FromArgb(0xFF, code, code, code));
+                                                    consoleColor = PSColorMap.GetNearestConsoleColor(Color.FromArgb(0xFF, code, code, code));
                                                 }
                                             }
 
@@ -257,7 +226,7 @@ namespace RhubarbGeekNz.PSWriteLine
 
                         if (clr.ToArgb() != 0)
                         {
-                            consoleColor = GetNearestConsoleColor(clr);
+                            consoleColor = PSColorMap.GetNearestConsoleColor(clr);
 
                             return true;
                         }
@@ -266,7 +235,7 @@ namespace RhubarbGeekNz.PSWriteLine
 
                 if (color is Color c)
                 {
-                    consoleColor = GetNearestConsoleColor(c);
+                    consoleColor = PSColorMap.GetNearestConsoleColor(c);
 
                     return true;
                 }
@@ -288,38 +257,6 @@ namespace RhubarbGeekNz.PSWriteLine
             consoleColor = ConsoleColor.Black;
 
             return false;
-        }
-
-        private static int GetDistance(Color color, Color baseColor)
-        {
-            int r = color.R - baseColor.R,
-                g = color.G - baseColor.G,
-                b = color.B - baseColor.B;
-            return r * r + g * g + b * b;
-        }
-
-        private ConsoleColor GetNearestConsoleColor(Color baseColor)
-        {
-            int current = Int32.MaxValue;
-            int index = ConsoleColorMap.Length, value = 0;
-
-            while (0 != (index--))
-            {
-                int distance = GetDistance(ConsoleColorMap[index].Color, baseColor);
-
-                if (distance < current)
-                {
-                    value = index;
-                    current = distance;
-
-                    if (distance == 0)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            return ConsoleColorMap[value].ConsoleColor;
         }
 
         private string ProcessObject(object o)
